@@ -33,7 +33,7 @@ import {capabilities} from './DisplayCapabilities.js'
 import { ValidateImages, AddImageValidationRequest, RemoveImageValidationResult } from '../Utils/ValidateImages'
 
 function BatchTimer() {
-    this.commandBatchTimer;
+    this.commandBatchTimer = null;
     this.data = [];
     this.delay = 0; // default delay
     this.funcApply = () => {};
@@ -42,7 +42,7 @@ function BatchTimer() {
 BatchTimer.prototype.add = (element) => {
     this.data.push(element);
     clearTimeout(this.commandBatchTimer);
-    this.commandBatchTimer(() => {
+    this.commandBatchTimer = setTimeout(() => {
         this.funcApply(this.data); // send the batched data to the function passed in
         this.data = [];
         delete this.commandBatchTimer;
