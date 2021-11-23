@@ -39,7 +39,7 @@ function BatchTimer() {
     this.funcApply = () => {};
 }
 
-BatchTimer.prototype.add = (element) => {
+BatchTimer.prototype.add = function (element) {
     this.data.push(element);
     clearTimeout(this.commandBatchTimer);
     this.commandBatchTimer = setTimeout(() => {
@@ -49,12 +49,12 @@ BatchTimer.prototype.add = (element) => {
     }, this.delay);
 };
 
-BatchTimer.prototype.setDelay = (num) => {
+BatchTimer.prototype.setDelay = function (num) {
     this.delay = num;
     return this;
 };
 
-BatchTimer.prototype.setFunction = (f) => {
+BatchTimer.prototype.setFunction = function (f) {
     this.funcApply = f;
     return this;
 };
