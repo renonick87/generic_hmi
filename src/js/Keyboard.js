@@ -226,7 +226,7 @@ class Keyboard extends Component {
     var interactionText = app && app.interactionText && app.interactionText.fieldText ? 
       app.interactionText.fieldText : "Tap on the virtual keyboard to start";
 
-    var parsedInput = this.state.input.replaceAll("\t", "        ");
+    var parsedInput = (this.state.input === undefined) ? this.state.input.replaceAll("\t", "        ") : "";
     var calculatedInputSize = parsedInput ? parsedInput.length : interactionText.length;
 
     var inputClassName = "div-input"
