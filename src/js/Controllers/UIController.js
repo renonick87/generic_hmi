@@ -111,6 +111,17 @@ const getNextSystemContext = () => {
     }
     return "MAIN"
 }
+const getDefaultLayout = (app) => {
+    if(app.appType.includes('WEB_VIEW')) {
+        return 'WEB_VIEW';
+    } else if(app.appType.includes('NAVIGATION') || app.appType.includes('PROJECTION')) {
+        return 'NAV_FULLSCREEN_MAP';
+    } else if(app.isMediaApplication === true) {
+        return 'MEDIA';
+    } else {
+        return 'NON-MEDIA';
+    }
+}
 const DEFAULT_TIMEOUT_VALUE = 10000;
 
 class UIController {
@@ -171,10 +182,12 @@ class UIController {
                     rpc.params.softButtons,
                     rpc.params.secondaryGraphic
                 ));
-                const templateConfiguration = rpc.params.templateConfiguration;
+                let templateConfiguration = rpc.params.templateConfiguration;
                 if (templateConfiguration && (showApp.isMediaApplication
                     || capabilities["MEDIA"].displayCapabilities.templatesAvailable.includes(templateConfiguration.template))) {
                     const prevDisplayLayout = appUIState ? appUIState.displayLayout : "";
+                    templateConfiguration.template = (templateConfiguration.template === 'DEFAULT') ? 
+                        getDefaultLayout(showApp) : templateConfiguration.template;
                     store.dispatch(setTemplateConfiguration(
                         templateConfiguration.template, 
                         rpc.params.appID, 
@@ -184,7 +197,7 @@ class UIController {
                     // inform other HMIs of the display change
                     this.listener.send(RpcFactory.NonSdlChangeDisplayLayout(templateConfiguration.template, rpc.params.appID));
                     
-                    if (prevDisplayLayout !== templateConfiguration.template) {
+                    if (prevDisplayLayout !== appUIState.displayLayout) {
                         this.listener.send(RpcFactory.OnSystemCapabilityDisplay(templateConfiguration.template, rpc.params.appID, showApp.isMediaApplication));
                     }                    
                 }
@@ -336,13 +349,15 @@ class UIController {
                 if (disallowedLayout) {
                     rpc.params.displayLayout = prevDisplayLayout;
                 }
-
+                if (rpc.params.displayLayout === 'DEFAULT') {
+                    rpc.params.displayLayout = getDefaultLayout(setDisplayLayoutApp)
+                }
                 store.dispatch(setTemplateConfiguration(rpc.params.displayLayout, rpc.params.appID, rpc.params.dayColorScheme, rpc.params.nightColorScheme));
                 // inform other HMIs of the display change
                 this.listener.send(RpcFactory.NonSdlChangeDisplayLayout(rpc.params.displayLayout, rpc.params.appID));
                 
 
-                if (prevDisplayLayout !== rpc.params.displayLayout) {
+                if (prevDisplayLayout !== appUIState.displayLayout) {
                     this.listener.send(RpcFactory.OnSystemCapabilityDisplay(rpc.params.displayLayout, rpc.params.appID));
                 }
                 return {"rpc": RpcFactory.SetDisplayLayoutResponse(rpc, disallowedLayout)};

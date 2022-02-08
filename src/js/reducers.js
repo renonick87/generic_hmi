@@ -578,9 +578,6 @@ function ui(state = {}, action) {
             return newState
         case Actions.SET_TEMPLATE_CONFIGURATION:
             switch(action.displayLayout) {
-                case "DEFAULT":
-                    app.displayLayout = "media"
-                    break
                 case "MEDIA":
                     app.displayLayout = "media"
                     break
@@ -633,6 +630,7 @@ function ui(state = {}, action) {
                     app.displayLayout = "nav-fullscreen-map"
                     break
                 default:
+                    console.error("Unrecognized template name:", action.displayLayout)
                     break
             }
             if (action.dayColorScheme) {
