@@ -62,7 +62,7 @@ BatchTimer.prototype.setFunction = function (f) {
 const dispatchTimer = new BatchTimer()
     .setDelay(100)
     .setFunction((data) => {
-        console.log(`Adding ${data.length} commands in a batch... bzzzt`);
+        console.log(`Performing ${data.length} menu updates in a batch`);
         const addCommands = data.filter(e => e[0] === 'addCommand').map(e => e[1]);
         const deleteCommands = data.filter(e => e[0] === 'deleteCommand').map(e => e[1]);
         const addSubMenus = data.filter(e => e[0] === 'addSubMenu').map(e => e[1]);
