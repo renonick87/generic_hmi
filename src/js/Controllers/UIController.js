@@ -62,6 +62,7 @@ BatchTimer.prototype.setFunction = function (f) {
 const dispatchTimer = new BatchTimer()
     .setDelay(100)
     .setFunction((data) => {
+        console.log(`Performing ${data.length} menu updates in a batch`);
         const addCommands = data.filter(e => e[0] === 'addCommand').map(e => e[1]);
         const deleteCommands = data.filter(e => e[0] === 'deleteCommand').map(e => e[1]);
         const addSubMenus = data.filter(e => e[0] === 'addSubMenu').map(e => e[1]);
@@ -78,10 +79,11 @@ const dispatchTimer = new BatchTimer()
         addSubMenus.map(add => {
             store.dispatch(addSubMenu(
                 add.appID,
-                add.cmdID,
+                add.menuID,
                 add.menuParams,
-                add.cmdIcon,
-                add.secondaryImage,
+                add.menuIcon,
+                add.menuLayout,
+                add.secondaryImage
             ));
         });
         deleteCommands.map(deleteCmd => {
@@ -225,13 +227,6 @@ class UIController {
                 return true
             case "AddCommand":
                 dispatchTimer.add(['addCommand', rpc.params]);
-                /*store.dispatch(addCommand(
-                    rpc.params.appID,
-                    rpc.params.cmdID,
-                    rpc.params.menuParams,
-                    rpc.params.cmdIcon,
-                    rpc.params.secondaryImage
-                ))*/
                 
                 ValidateImages([rpc.params.cmdIcon]).then(
                     () => {this.listener.respondSuccess(rpc.method, rpc.id)},
@@ -250,14 +245,6 @@ class UIController {
                     }
                 }
                 dispatchTimer.add(['addSubMenu', rpc.params]);
-                /* store.dispatch(addSubMenu(
-                    rpc.params.appID,
-                    rpc.params.menuID,
-                    rpc.params.menuParams,
-                    rpc.params.menuIcon,
-                    rpc.params.menuLayout,
-                    rpc.params.secondaryImage
-                ))*/
 
                 ValidateImages([rpc.params.menuIcon]).then(
                     () => {this.listener.respondSuccess(rpc.method, rpc.id)},
@@ -266,17 +253,9 @@ class UIController {
                 break;
             case "DeleteCommand":
                 dispatchTimer.add(['deleteCommand', rpc.params]);
-                /*store.dispatch(deleteCommand(
-                    rpc.params.appID,
-                    rpc.params.cmdID
-                ))*/
                 return true
             case "DeleteSubMenu":
                 dispatchTimer.add(['deleteSubMenu', rpc.params]);
-                /*store.dispatch(deleteSubMenu(
-                    rpc.params.appID,
-                    rpc.params.menuID
-                ))*/
                 return true
             case "ShowAppMenu":
                 store.dispatch(showAppMenu(
