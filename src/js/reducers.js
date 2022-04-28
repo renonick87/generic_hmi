@@ -385,6 +385,47 @@ function deleteSubMenu(commands, menuID) {
     return commands
 }
 
+function addCommand(menu, menuParams, menuItem) {
+    let result = null;
+    if (menuParams.parentID) {
+        /*var subMenu = menu.find((command) => {
+            return command.menuID === menuParams.parentID
+        });*/
+        result = SubmenuDeepFind(menu, menuItem.parentID, 0);
+        if (!result) {
+            return menu;
+        }
+        menuItem.menuDepth = result.depth;
+        (menuParams.position || menuParams.position === 0) ? 
+            result.subMenu.subMenu.splice(menuParams.position, 0, menuItem) : 
+            result.subMenu.subMenu.push(menuItem);
+    } else {
+        (menuParams.position || menuParams.position === 0) ? 
+            menu.splice(menuParams.position, 0, menuItem) : 
+            menu.push(menuItem);
+    }
+    return menu;
+}
+
+function addSubMenu(menu, position, menuItem) {
+    let result = null;
+    if (menuItem.parentID) {
+        result = SubmenuDeepFind(menu, menuItem.parentID, 0);
+        if (!result) {
+            return menu;
+        }
+        menuItem.menuDepth = result.depth;
+        (position || position === 0) ? 
+        result.subMenu.subMenu.splice(position, 0, menuItem) : 
+        result.subMenu.subMenu.push(menuItem);
+    } else {
+        (position || position === 0) ? 
+            menu.splice(position, 0, menuItem) : 
+            menu.push(menuItem);
+    }
+    return menu;
+}
+
 function ui(state = {}, action) {
     var newState = { ...state }
     var app = newState[action.appID] ? newState[action.appID] : newAppState();
@@ -393,6 +434,11 @@ function ui(state = {}, action) {
     var menuItem = null;
     var result = null;
     var i = 0;
+    var position = null;
+    var menuParams = null
+    var cmdID = null
+    var cmdIcon = null
+    var secondaryImage = null
     app.refreshImage = null;
     switch (action.type) {
         case Actions.SHOW:           
@@ -418,10 +464,10 @@ function ui(state = {}, action) {
             app.refreshImage = action.icon
             return newState
         case Actions.ADD_COMMAND:
-            var menuParams = action.menuParams
-            var cmdID = action.cmdID
-            var cmdIcon = action.cmdIcon
-            var secondaryImage = action.secondaryImage
+            menuParams = action.menuParams
+            cmdID = action.cmdID
+            cmdIcon = action.cmdIcon
+            secondaryImage = action.secondaryImage
             menuItem = {
                 cmdID: cmdID,
                 parentID: menuParams.parentID,
@@ -450,11 +496,35 @@ function ui(state = {}, action) {
                     menu.push(menuItem);
             }
             return newState
+        case Actions.ADD_COMMANDS:
+            action.params.forEach(({ cmdID, menuParams, cmdIcon, secondaryImage }) => {
+                menuParams = action.menuParams
+                cmdID = action.cmdID
+                cmdIcon = action.cmdIcon
+                secondaryImage = action.secondaryImage
+                menuItem = {
+                    cmdID: cmdID,
+                    parentID: menuParams.parentID,
+                    position: menuParams.position,
+                    menuName: menuParams.menuName,
+                    secondaryText: menuParams.secondaryText,
+                    tertiaryText: menuParams.tertiaryText,
+                    cmdIcon: cmdIcon,
+                    secondaryImage: secondaryImage
+                }
+                menu = addCommand(menu, menuParams, menuItem);
+            })
+            return newState
         case Actions.DELETE_COMMAND:
             menu = deleteCommand(menu, action.cmdID)
             return newState
+        case Actions.DELETE_COMMANDS:
+            action.cmdIDs.forEach(({ cmdID }) => {
+                menu = deleteCommand(menu, cmdID)
+            })
+            return newState
         case Actions.ADD_SUB_MENU:
-            var position = action.menuParams.position
+            position = action.menuParams.position
             menuItem = {
                 menuID: action.menuID,
                 parentID: action.menuParams.parentID,
@@ -483,8 +553,29 @@ function ui(state = {}, action) {
                     menu.push(menuItem);
             }
             return newState
+        case Actions.ADD_SUB_MENUS:
+            position = action.menuParams.position
+            menuItem = {
+                menuID: action.menuID,
+                parentID: action.menuParams.parentID,
+                position: action.menuParams.position,
+                menuName: action.menuParams.menuName,
+                secondaryText: action.menuParams.secondaryText,
+                tertiaryText: action.menuParams.tertiaryText,
+                cmdIcon: action.subMenuIcon,
+                secondaryImage: action.secondaryImage,
+                subMenu: [],
+                menuLayout: action.menuLayout
+            };
+            addSubMenu(menu, position, menuItem);
+            return newState
         case Actions.DELETE_SUB_MENU:
             app.menu = deleteSubMenu(menu, action.menuID);
+            return newState
+        case Actions.DELETE_SUB_MENUS:
+            action.menuIDs.forEach(({ menuID }) => {
+                app.menu = deleteSubMenu(menu, menuID);
+            })
             return newState
         case Actions.SHOW_APP_MENU:
             app.triggerShowAppMenu = true

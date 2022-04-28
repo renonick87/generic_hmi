@@ -10,6 +10,10 @@ export const Actions = {
     DELETE_COMMAND: "DELETE_COMMAND",
     ADD_SUB_MENU: "ADD_SUB_MENU",
     DELETE_SUB_MENU: "DELETE_SUB_MENU",
+    ADD_COMMANDS: "ADD_COMMANDS",
+    DELETE_COMMANDS: "DELETE_COMMANDS",
+    ADD_SUB_MENUS: "ADD_SUB_MENUS",
+    DELETE_SUB_MENUS: "DELETE_SUB_MENUS",
     SUBSCRIBE_BUTTON: "SUBSCRIBE_BUTTON",
     ACTIVATE_SUB_MENU: "ACTIVATE_SUB_MENU",
     DEACTIVATE_SUB_MENU: "DEACTIVATE_SUB_MENU",
@@ -116,12 +120,39 @@ export const addCommand = (appID, cmdID, menuParams, cmdIcon, secondaryImage) =>
     }
 }
 
+export const addCommands = (appID, rpcs) => {
+    return {
+        type: Actions.ADD_COMMANDS,
+        appID: appID,
+        params: rpcs.map(rpc => {
+            return {
+                cmdID: rpc.cmdID,
+                menuParams: rpc.menuParams,
+                cmdIcon: rpc.cmdIcon,
+                secondaryImage: rpc.secondaryImage
+            }
+        })
+    };
+}
+
 export const deleteCommand = (appID, cmdID) => {
     return {
         type: Actions.DELETE_COMMAND,
         appID: appID,
         cmdID: cmdID
     }
+}
+
+export const deleteCommands = (appID, rpcs) => {
+    return {
+        type: Actions.DELETE_COMMANDS,
+        appID: appID,
+        cmdIDs: rpcs.map(rpc => {
+            return {
+                cmdID: rpc.cmdID
+            }
+        })
+    };
 }
 
 export const addSubMenu = (appID, menuID, menuParams, icon, menuLayout, secondaryImage) => {
@@ -136,12 +167,40 @@ export const addSubMenu = (appID, menuID, menuParams, icon, menuLayout, secondar
     }
 }
 
+export const addSubMenus = (appID, rpcs) => {
+    return {
+        type: Actions.ADD_SUB_MENUS,
+        appID: appID,
+        params: rpcs.map(rpc => {
+            return {
+                menuID: rpc.menuID,
+                menuParams: rpc.menuParams,
+                subMenuIcon: rpc.icon,
+                menuLayout: rpc.menuLayout,
+                secondaryImage: rpc.secondaryImage
+            }
+        })
+    };
+}
+
 export const deleteSubMenu = (appID, menuID) => {
     return {
         type: Actions.DELETE_SUB_MENU,
         appID: appID,
         menuID: menuID
     }
+}
+
+export const deleteSubMenus = (appID, rpcs) => {
+    return { 
+        type: Actions.DELETE_SUB_MENUS,
+        appID: appID,
+        menuIDs: rpcs.map(rpc => {
+            return {
+                menuID: rpc.menuID
+            }
+        })
+    };
 }
 
 export const subscribeButton = (appID, buttonName, isSubscribed) => {

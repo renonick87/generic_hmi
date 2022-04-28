@@ -7,6 +7,10 @@ import {
     addSubMenu, 
     deleteCommand, 
     deleteSubMenu, 
+    addCommands, 
+    addSubMenus, 
+    deleteCommands, 
+    deleteSubMenus, 
     subscribeButton, 
     performInteraction,
     timeoutPerformInteraction,
@@ -63,11 +67,28 @@ const dispatchTimer = new BatchTimer()
     .setDelay(100)
     .setFunction((data) => {
         console.log(`Performing ${data.length} menu updates in a batch`);
-        const addCommands = data.filter(e => e[0] === 'addCommand').map(e => e[1]);
-        const deleteCommands = data.filter(e => e[0] === 'deleteCommand').map(e => e[1]);
-        const addSubMenus = data.filter(e => e[0] === 'addSubMenu').map(e => e[1]);
-        const deleteSubMenus = data.filter(e => e[0] === 'deleteSubMenu').map(e => e[1]);
-        addCommands.map(add => {
+        const addCommandRpcs = data.filter(e => e[0] === 'addCommand').map(e => e[1]);
+        const deleteCommandRpcs = data.filter(e => e[0] === 'deleteCommand').map(e => e[1]);
+        const addSubMenuRpcs = data.filter(e => e[0] === 'addSubMenu').map(e => e[1]);
+        const deleteSubMenuRpcs = data.filter(e => e[0] === 'deleteSubMenu').map(e => e[1]);
+        // group commands by app ID since it's possible for menu updates to come in from multiple apps
+        const addCommandGroups = addCommandRpcs.groupBy(({appID}) => appID);
+        Object.keys(addCommandGroups).forEach(appID => {
+            store.dispatch(addCommands(appID, addCommandGroups[appID]));
+        })
+        const addSubMenuGroups = addSubMenuRpcs.groupBy(({appID}) => appID);
+        Object.keys(addSubMenuGroups).forEach(appID => {
+            store.dispatch(addSubMenus(appID, addSubMenuGroups[appID]));
+        })
+        const deleteCommandGroups = deleteCommandRpcs.groupBy(({appID}) => appID);
+        Object.keys(deleteCommandGroups).forEach(appID => {
+            store.dispatch(deleteCommands(appID, deleteCommandGroups[appID]));
+        })
+        const deleteSubMenuGroups = deleteSubMenuRpcs.groupBy(({appID}) => appID);
+        Object.keys(deleteSubMenuGroups).forEach(appID => {
+            store.dispatch(deleteSubMenus(appID, deleteCommandGroups[appID]));
+        })
+        /* addCommands.map(add => {
             store.dispatch(addCommand(
                 add.appID,
                 add.cmdID,
@@ -97,7 +118,7 @@ const dispatchTimer = new BatchTimer()
                 deleteCmd.appID,
                 deleteCmd.menuID,
             ));
-        });
+        });*/
     });
 
 const getNextSystemContext = () => {
