@@ -497,11 +497,11 @@ function ui(state = {}, action) {
             }
             return newState
         case Actions.ADD_COMMANDS:
-            action.params.forEach(({ cmdID, menuParams, cmdIcon, secondaryImage }) => {
-                menuParams = action.menuParams
-                cmdID = action.cmdID
-                cmdIcon = action.cmdIcon
-                secondaryImage = action.secondaryImage
+            action.params.forEach((actionParam) => {
+                menuParams = actionParam.menuParams
+                cmdID = actionParam.cmdID
+                cmdIcon = actionParam.cmdIcon
+                secondaryImage = actionParam.secondaryImage
                 menuItem = {
                     cmdID: cmdID,
                     parentID: menuParams.parentID,
@@ -554,20 +554,22 @@ function ui(state = {}, action) {
             }
             return newState
         case Actions.ADD_SUB_MENUS:
-            position = action.menuParams.position
-            menuItem = {
-                menuID: action.menuID,
-                parentID: action.menuParams.parentID,
-                position: action.menuParams.position,
-                menuName: action.menuParams.menuName,
-                secondaryText: action.menuParams.secondaryText,
-                tertiaryText: action.menuParams.tertiaryText,
-                cmdIcon: action.subMenuIcon,
-                secondaryImage: action.secondaryImage,
-                subMenu: [],
-                menuLayout: action.menuLayout
-            };
-            addSubMenu(menu, position, menuItem);
+            action.params.forEach((actionParam) => {
+                position = actionParam.menuParams.position
+                menuItem = {
+                    menuID: actionParam.menuID,
+                    parentID: actionParam.menuParams.parentID,
+                    position: actionParam.menuParams.position,
+                    menuName: actionParam.menuParams.menuName,
+                    secondaryText: actionParam.menuParams.secondaryText,
+                    tertiaryText: actionParam.menuParams.tertiaryText,
+                    cmdIcon: actionParam.subMenuIcon,
+                    secondaryImage: actionParam.secondaryImage,
+                    subMenu: [],
+                    menuLayout: actionParam.menuLayout
+                };
+                addSubMenu(menu, position, menuItem);
+            })
             return newState
         case Actions.DELETE_SUB_MENU:
             app.menu = deleteSubMenu(menu, action.menuID);
