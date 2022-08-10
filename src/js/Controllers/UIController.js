@@ -46,6 +46,16 @@ function BatchTimer() {
 BatchTimer.prototype.add = function (element) {
     this.data.push(element);
     clearTimeout(this.commandBatchTimer);
+    // set a max timer so the requests don't timeout
+    if (!this.maxDelayTimer) {
+        this.maxDelayTimer = setTimeout(() => {
+            this.funcApply(this.data); // send the batched data to the function passed in
+            this.data = [];
+            delete this.maxDelayTimer;
+            delete this.commandBatchTimer;
+        }, this.maxDelay);
+        return;
+    }
     this.commandBatchTimer = setTimeout(() => {
         this.funcApply(this.data); // send the batched data to the function passed in
         this.data = [];
@@ -55,6 +65,11 @@ BatchTimer.prototype.add = function (element) {
 
 BatchTimer.prototype.setDelay = function (num) {
     this.delay = num;
+    return this;
+};
+
+BatchTimer.prototype.setMaxDelay = function (num) {
+    this.maxDelay = num;
     return this;
 };
 
@@ -72,6 +87,7 @@ function groupBy (array, key) {
 
 const dispatchTimer = new BatchTimer()
     .setDelay(100)
+    .setMaxDelay(2000)
     .setFunction((data) => {
         console.log(`Performing ${data.length} menu updates in a batch`);
         const addCommandRpcs = data.filter(e => e[0] === 'addCommand').map(e => e[1]);
